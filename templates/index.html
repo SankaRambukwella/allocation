@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Allocation Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
+    <!-- Add Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        
+    /* Custom CSS for Chart Section */
+    .chart-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 30px;
+        margin: 40px auto;
+        padding: 0 20px;
+        max-width: 1400px;
+    }
+
+    .chart-card {
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        padding: 20px;
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .chart-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .chart-card h3 {
+        margin-bottom: 15px;
+        color: #444;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    /* Chart Container for Full-Width Layout */
+    .container {
+        max-width: 1200px;
+        margin: 40px auto;
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    h2, h3 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .chart-container {
+            height: 250px;
+        }
+
+        .chart-card h3 {
+            font-size: 1rem;
+        }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+        .chart-container {
+            height: 270px;
+        }
+    }
+</style>
+
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-logo">AMS</a>
+            <ul class="navbar-menu">
+                <li><a href="/">Home</a></li>
+                <li><a href="/admin">Admin Dashboard</a></li>
+                <li><a href="/user">User Dashboard</a></li>
+                <li><a href="/procurement">Procurement</a></li>
+                <li><a href="/reports">Reports</a></li>
+            </ul>
+            <button class="navbar-toggle" onclick="toggleMenu()">☰</button>
+        </div>
+    </nav>
+
+    <h1>DDG (Logistics) Allocation Management System</h1>
+   
+    <!-- Chart Section -->
+    <div class="chart-section">
+        <!-- Allocation Based on Vote Numbers -->
+        <div class="chart-card">
+            <h3>Allocations Based on Vote Numbers</h3>
+            <div class="chart-container">
+                <canvas id="voteNumbersChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Top 10 Allocation Received Hospitals -->
+        <div class="chart-card">
+            <h3>Top 10 Allocation Received Hospitals</h3>
+            <div class="chart-container">
+                <canvas id="topHospitalsChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h3>Allocations Overview</h3>
+        <div class="chart-container">
+            <canvas id="allocationChart"></canvas>
+        </div>
+    </div>
+
+    
+    <!-- Summary of User Updates -->
+    <h3>Summary of User Updates</h3>
+    <div id="userUpdatesSummary"></div>
+
+    <script>
+        // Function to create the Vote Numbers Chart
+        function createVoteNumbersChart(data) {
+            const labels = data.map(vote => vote.voteNumber);
+            const allocations = data.map(vote => vote.totalAllocation);
+
+            const ctx = document.getElementById('voteNumbersChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Vote Number Allocations',
+                        data: allocations,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(255, 206, 86, 0.6)',
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(153, 102, 255, 0.6)',
+                            'rgba(255, 159, 64, 0.6)'
+                        ],
+                        borderColor: 'rgba(255, 255, 255, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: { enabled: true }
+                    }
+                }
+            });
+        }
+
+        // Function to create the Top Hospitals Chart
+        function createTopHospitalsChart(data) {
+            const labels = data.map(hospital => hospital.name);
+            const allocations = data.map(hospital => hospital.totalAllocation);
+
+            const ctx = document.getElementById('topHospitalsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Total Allocations',
+                        data: allocations,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        tooltip: { enabled: true }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Hospitals' }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Total Allocation (in units)' }
+                        }
+                    }
+                }
+            });
+        }
+// Data for the chart
+const allocationData = {
+            labels: [
+                "111-01-05-2001 (11)",
+                "111-01-05-2002 (11)",
+                "111-01-05-2103 (11)"
+            ],
+            datasets: [{
+                label: "Allocations (in Million.)",
+                data: [40000, 2000, 1000],
+                backgroundColor: [
+                    "#003366",
+                    "#003366",
+                    "#003366"
+                ],
+                borderColor: [
+                    "#003366",
+                    "#003366",
+                    "#003366"
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        // Chart configuration
+        const config = {
+            type: "line", // Change to "pie" if you prefer a pie chart
+            data: allocationData,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: "top"
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `Rs. ${context.raw.toLocaleString()}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: "Allocation Amount (Rs.)"
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: "Vote Numbers"
+                        }
+                    }
+                }
+            }
+        };
+
+        // Render the chart
+        const ctx = document.getElementById("allocationChart").getContext("2d");
+        new Chart(ctx, config);
+
+        // Fetch data and initialize charts
+        function initializeCharts() {
+            fetch('/voteAllocations')
+                .then(response => response.json())
+                .then(data => createVoteNumbersChart(data))
+                .catch(error => console.error('Error fetching vote data:', error));
+
+            fetch('/topHospitals')
+                .then(response => response.json())
+                .then(data => createTopHospitalsChart(data))
+                .catch(error => console.error('Error fetching hospital data:', error));
+
+            fetch('/userUpdatesSummary')
+                .then(response => response.json())
+                .then(summary => {
+                    document.getElementById('userUpdatesSummary').innerHTML = `
+                        <p>Total Number of Entries: ${summary.totalAllocations}</p>
+                    `;
+                })
+                .catch(error => console.error('Error fetching user summary:', error));
+        }
+
+        // Initialize charts when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initializeCharts);
+    </script>
+</body>
+</html>

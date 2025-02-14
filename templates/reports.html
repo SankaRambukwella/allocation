@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
+    <title>Reports</title>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-logo">AMS</a>
+            <ul class="navbar-menu">
+                <li><a href="/">Home</a></li>
+                <li><a href="/user">User Dashboard</a></li>
+                <li><a href="/admin">Admin Dashboard</a></li>
+                <li><a href="/procurement">Procurement</a></li>
+                <li><a href="/reports">Reports</a></li>
+            </ul>
+            <button class="navbar-toggle" onclick="toggleMenu()">☰</button>
+        </div>
+    </nav>
+
+    <h2>Reports Page</h2>
+
+    <div>
+        <h3>Generate Reports</h3>
+
+        <!-- Custom Report Option -->
+        <div>
+            <h4>Custom Report</h4>
+            <form action="/generate_custom_report" method="GET">
+                <label for="hospital">Hospital Name:</label>
+                <input type="text" id="hospital" name="hospital" placeholder="Enter hospital name">
+                <label for="vote">Vote:</label>
+                <input type="text" id="vote" name="vote" placeholder="Enter vote">
+                <button type="submit">Generate Custom Report</button>
+            </form>
+        </div>
+
+        <!-- Full Report Option -->
+        <div>
+            <h4>Full Report</h4>
+            <form action="/generate_full_report" method="GET">
+                <button type="submit">Generate Full Report</button>
+            </form>
+        </div>
+
+        <!-- Export to Excel -->
+        <div>
+            <h4>Export to Excel</h4>
+            <a href="/export_to_excel" class="export-btn">Download Excel</a>
+        </div>
+    </div>
+</body>
+</html>

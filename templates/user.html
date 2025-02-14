@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
+    <script src="{{ url_for('static', filename='scripts/user.js') }}" defer></script>
+   <style>
+    /* General styling */
+ /* Existing styles remain the same */
+ body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #111213;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .table-container {
+            margin: 20px auto;
+            max-width: 90%;
+            background-color: #ffffff;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .summary-container {
+            margin: 20px auto;
+            max-width: 90%;
+            padding: 20px;
+            background-color: #e9ecef;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-container h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .summary-stats {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .search-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
+
+        .search-container input {
+            padding: 8px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            margin: 0 5px;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+
+        .pagination button.active {
+            background-color: #0056b3;
+        }
+
+        .pagination button:hover:not(.active) {
+            background-color: #0056b3;
+        }
+
+        .pagination button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .summary-container {
+        margin: 20px auto;
+        max-width: 90%;
+        padding: 20px;
+        background-color: #e9ecef;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .summary-container h3 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .summary-cards {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .card {
+        flex: 1 1 calc(33% - 20px);
+        max-width: calc(33% - 20px);
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        border-radius: 10px;
+        padding: 20px;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-icon {
+        font-size: 36px;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 10px;
+        border-radius: 50%;
+    }
+
+    .card-content h4 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .card-content p {
+        margin: 5px 0 0;
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    /* Responsive adjustments */
+    @media screen and (max-width: 768px) {
+        .card {
+            flex: 1 1 calc(50% - 10px);
+            max-width: calc(50% - 10px);
+        }
+    }
+
+    @media screen and (max-width: 480px) {
+        .card {
+            flex: 1 1 100%;
+            max-width: 100%;
+        }
+    }
+
+    .print-button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    .print-button:hover {
+        background-color: #0056b3;
+    }
+   </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-logo">AMS</a>
+            <ul class="navbar-menu">
+                <li><a href="/">Home</a></li>
+                <li><a href="/admin">Admin Dashboard</a></li>
+                <li><a href="/user">User Dashboard</a></li>
+                <li><a href="/procurement">Procurement</a></li>
+                <li><a href="/reports">Reports</a></li>
+            </ul>
+            <button class="navbar-toggle" onclick="toggleMenu()">☰</button>
+        </div>
+    </nav>
+    <div class="search-container">
+        <input type="text" id="search" placeholder="Search by hospital or job description" oninput="searchData()">
+    </div>
+    <div id="dataSubmissionForm">
+        <h2>Submit Your Data</h2>
+        <form id="userForm">
+            <label for="date">Date:</label>
+            <input type="date" id="date" name="date" required>
+            
+            <label for="hospital">Hospital:</label>
+            <input type="text" id="hospital" name="hospital" placeholder="Select Hospital" list="institutions" required>
+            <datalist id="institutions">
+                
+              <option value="Leprosy Hospital - Hendala">
+                <option value="Teaching Hospital,Peradeniya">
+                <option value="Sirimawo Bandaranayake Specialize Children Hospital Peradeniya">
+                <option value="Colombo East Base Hospital Mulleriyawa">
+                <option value="National Hospital of Sri Lanka">
+                <option value="National Program For Tuberculosis Control & Chest Diseases">
+                <option value="Institute for Forensic medicine & Toxicology ( JMO )">
+                <option value="National Hospital for Respiratory Diseases,Welisara">
+                <option value="National Institute of Mental Health">
+                <option value="TH-Anuradhapura">
+                <option value="lady Ridgeway Hospital for Children">
+                <option value="TH Karapitiya ">
+                <option value="TH Badulla ">
+                <option value="National Eye Hospital ">
+                <option value="TH - Kalubowila ">
+                <option value="Teaching Hospital-Polonnaruwa">
+                <option value="TH Negombo">
+                <option value="Anti Maleria Campaign">
+                <option value="De Soysa Maternity Hospital">
+                <option value="National Institute of Infection Diseases">
+                <option value="DGH - Trincomalee ">
+                <option value="BH -Kantale ">
+                <option value="DGH -Hambantota ">
+                <option value="DGH -Hambantota NTS ">
+                <option value="TH - Mahamodara">
+                <option value="DGH - Monaragala">
+                <option value="DGH - Kegalle">
+                <option value="DGH - Chilaw">
+                <option value="National Hospital for Respiratory Diseases,Welisara">
+                <option value="DGH NuwaraEliya">
+                <option value="TH-Jaffna">
+               <option value="TH-Batticaloa">
+               <option value="Castle street Hospital for women">
+                <option value="BH-Akkaraipattu">
+                <option value="BH-Kalmunai">
+               <option value="BH-Ashroff Memorial Hospital">
+                <option value="BH-Gampola">
+                <option value="DGH-Ampara">
+                <option value="DGH-Nawalapitiya">
+                <option value="TH-Kurunegala">
+                <option value="TH-Kandy">
+                <option value="Colombo North Teaching Hospital=-Ragama">
+                <option value="DGH-Matale">
+                <option value="National Dental Hospital (Teaching )- Colombo 07 ">
+                <option value="Rheumatology and Rehabilitation Hospital - Ragama">
+                <option value="NTS-Kandana">
+                <option value="District Hospital -Kandana">
+                <option value="The National Institute for Nephrology Dialysis & Transplantation">
+                <option value="School Health Office -Narahenpita">
+                <option value="Medical Reseach Institute- Borella">
+                <option value="Epidemology Unit">
+                <option value="National STD/AIDS Control Programme">
+                <option value="Family Health Bureau">
+                <option value="National Dengue Control Unit">
+                <option value="Bio Medical Engeering Service">
+                <option value="Anti Filaria Control Programme">
+                <option value="National Blood Transfusion Service">
+                <option value="Medical Suply Devision Colombo 10">
+                <option value="Health Promotion Bureau">
+                <option value="Public Health veterinary Service">
+                <option value="Apeksha Hospital Maharagama">
+                <option value="National Institue of Health Service- Kaluthara">
+                <option value="Teaching Hospital-Kaluthara">
+                <option value="BH-Dharga">
+                <option value="BH-Beruwala">
+                <option value="BH-Aluthgama">
+                <option value="National Institute of Oral Health- Maharagama">
+                <option value="Public Health veterinary Service">
+                <option value="Gallassa Maternity and Children Hospital-Kaluthara">
+                <!-- Add more hospitals -->
+            </datalist>
+
+            <label for="voteNumber">Vote Number:</label>
+            <select id="voteNumber" name="voteNumber" required>
+                <option value="111-01-05-2001(11)">111-01-05-2001(11)</option>
+                <option value="111-01-05-2002(11)">111-01-05-2002(11)</option>
+                <option value="111-01-05-2103(11)">111-01-05-2103(11)</option>
+                <option value="111-02-20-001-2001(11)">111-02-20-001-2001(11)</option>
+                <option value="111-02-20-001-2002(11)">111-02-20-001-2002(11)</option>
+                <option value="111-02-20-001-2103(11)">111-02-20-001-2103(11)</option>
+                <option value="111-02-26-2001(11)">111-02-26-2001(11)</option>
+                <option value="111-02-26-2002(11)">111-02-26-2002(11)</option>
+                <option value="111-02-26-2103(11)">111-02-26-2103(11)</option>
+                <option value="111-02-26-008-2001(11)">111-02-26-008-2001(11)</option>
+            </select>
+
+            <label for="amount">  Amount:</label>
+            <input type="text" id="amount" name="amount" placeholder="Enter Amount" oninput="formatAmount()" required>
+            <label for="jobDescription">Job Description:</label>
+            <input type="text" id="jobDescription" name="jobDescription" placeholder="Enter Letter Reference, Date & Job Description" required>
+
+            <label for="progress">Progress:</label>
+            <select id="progress" name="progress" required>
+                <option value="In Progress">Level 0 - In Progres</option>
+                <option value=" Requirement Identification 5%">Level 1 - Requirement Identification 5%</option>
+                <option value="Estimation 10%">Level 2 - Estimation 10%</option>
+                <option value="Allocation 15%">Level 3 - Allocation 15%</option>
+                <option value="Procurement 20%">Level 4 - Procurement 20%</option>
+                <option value="Awarding 25%">Level 5 - Awarding 25%</option>
+                <option value="Advance Payment 30%">Level 6 - Advance Payment 30%</option>
+                <option value="Bill Payment 50%">Level 7 - Bill Payment 50%</option>
+                <option value="Final bill Received 75%">Level 8 - Final bill Received 75%</option>
+                <option value="Final bill payment 95%">Level 9 - Final bill payment 95%</option>
+                <option value="Releasement of retention 100%">Level 10 - Releasement of retention 100%</option>
+                <option value="Financial Progress">Level 11 - Financial Progress</option>
+                <option value="phyisicalProgress">Level 12 - In Phyisical Progress</option>
+                <option value="phyisicalProgress 25% Done">Level 13 - phyisical Progress 25% Done</option>
+                <option value="phyisicalProgress 50% Done">Level 14 - phyisical Progress 50% Done</option>
+                <option value="phyisicalProgress 75% Done">Level 15 - phyisical Progress 75% Done</option>
+                <option value="phyisicalProgress 100% Done">Level 16 - phyisical Progress 100% Done</option>
+
+            </select>
+
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <div id="dataTable">
+        <h2>Submitted Data</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Hospital</th>
+                    <th>Vote Number</th>
+                    <th>Amount</th>  
+                    <th>Job Description</th>
+                    <th>Progress</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Data will be dynamically added here -->
+            </tbody>
+        </table>
+
+       <!-- Pagination -->
+       <div class="pagination" id="pagination">
+        <!-- Pagination buttons will be dynamically inserted here -->
+    </div>
+
+</div>
+    </div>
+    </script>
+</body>
+</html>

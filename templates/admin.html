@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
+    <style>
+        /* Existing styles remain the same */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #111213;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .table-container {
+            margin: 20px auto;
+            max-width: 90%;
+            background-color: #ffffff;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .summary-container {
+            margin: 20px auto;
+            max-width: 90%;
+            padding: 20px;
+            background-color: #e9ecef;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-container h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .summary-stats {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .search-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
+
+        .search-container input {
+            padding: 8px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            margin: 0 5px;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+
+        .pagination button.active {
+            background-color: #0056b3;
+        }
+
+        .pagination button:hover:not(.active) {
+            background-color: #0056b3;
+        }
+
+        .pagination button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .summary-container {
+        margin: 20px auto;
+        max-width: 90%;
+        padding: 20px;
+        background-color: #e9ecef;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .summary-container h3 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .summary-cards {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .card {
+        flex: 1 1 calc(33% - 20px);
+        max-width: calc(33% - 20px);
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        border-radius: 10px;
+        padding: 20px;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-icon {
+        font-size: 36px;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 10px;
+        border-radius: 50%;
+    }
+
+    .card-content h4 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .card-content p {
+        margin: 5px 0 0;
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    /* Responsive adjustments */
+    @media screen and (max-width: 768px) {
+        .card {
+            flex: 1 1 calc(50% - 10px);
+            max-width: calc(50% - 10px);
+        }
+    }
+
+    @media screen and (max-width: 480px) {
+        .card {
+            flex: 1 1 100%;
+            max-width: 100%;
+        }
+    }
+
+    .print-button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    .print-button:hover {
+        background-color: #0056b3;
+    }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-logo">AMS</a>
+            <ul class="navbar-menu">
+                <li><a href="/">Home</a></li>
+                <li><a href="/admin">Admin Dashboard</a></li>
+                <li><a href="/user">User Dashboard</a></li>
+                <li><a href="/procurement">Procurement</a></li>
+                <li><a href="/reports">Reports</a></li>
+            </ul>
+            <button class="navbar-toggle" onclick="toggleMenu()">☰</button>
+        </div>
+    </nav>
+
+    <div class="table-container">
+        <h2>Admin Dashboard</h2>
+
+        <div class="search-container">
+            <input type="text" id="search" placeholder="Search by hospital or job description" oninput="searchData()">
+        </div>
+
+        <!-- Summary Section -->
+        <!-- Inside the body -->
+
+<div class="summary-container">
+    <h3>Summary</h3>
+    <div class="summary-cards">
+        <div class="card">
+            <div class="card-icon">
+                💵
+            </div>
+            <div class="card-content">
+                <h4>Total Amount</h4>
+                <p id="totalAmount">Rs 0</p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-icon">
+                📋
+            </div>
+            <div class="card-content">
+                <h4>Total Jobs</h4>
+                <p id="totalJobs">0</p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-icon">
+                📊
+            </div>
+            <div class="card-content">
+                <h4>Average Progress</h4>
+                <p id="averageProgress">0%</p>
+            </div>
+        </div>
+    </div>
+   
+    </ul>
+</div>
+
+
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Hospital</th>
+                    <th>Vote Number</th>
+                    <th>Amount</th>
+                    <th>Job Description</th>
+                    <th>Progress</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Table rows will be dynamically inserted here -->
+            </tbody>
+        </table>
+        <div class="actions-container" style="text-align: right; margin-bottom: 10px;">
+            <button onclick="printTableData()" class="print-button">Print</button>
+        </div>
+        <div class="pagination" id="pagination">
+            <!-- Pagination buttons will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const rowsPerPage = 5;
+        let data = [];
+
+        // Fetch and display data
+        function loadTableData() {
+            fetch('/getData')
+                .then(response => response.json())
+                .then(responseData => {
+                    data = responseData;
+                    renderTable();
+                    renderPagination();
+                    updateSummary(data); // Update summary for full data on initial load
+                })
+                .catch(error => console.error('Error loading data:', error));
+        }
+
+        // Render table rows
+        function renderTable() {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const rows = data.slice(start, end);
+
+            rows.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.date}</td>
+                    <td>${item.hospital}</td>
+                    <td>${item.voteNumber}</td>
+                    <td>${item.amount}</td>
+                    <td>${item.jobDescription}</td>
+                    <td>${item.progress}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // Render pagination buttons
+        function renderPagination() {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            const totalPages = Math.ceil(data.length / rowsPerPage);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement('button');
+                button.textContent = i;
+                button.className = i === currentPage ? 'active' : '';
+                button.disabled = i === currentPage;
+                button.onclick = () => {
+                    currentPage = i;
+                    renderTable();
+                    renderPagination();
+                };
+                pagination.appendChild(button);
+            }
+        }
+
+        // Search functionality
+        function searchData() {
+            const query = document.getElementById('search').value.toLowerCase();
+            const filteredData = data.filter(item => 
+                item.hospital.toLowerCase().includes(query) || 
+                item.jobDescription.toLowerCase().includes(query)
+            );
+
+            renderFilteredTable(filteredData);
+            updateSummary(filteredData); // Update summary for filtered data
+        }
+
+        function renderFilteredTable(filteredData) {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+            filteredData.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.date}</td>
+                    <td>${item.hospital}</td>
+                    <td>${item.voteNumber}</td>
+                    <td>${item.amount}</td>
+                    <td>${item.jobDescription}</td>
+                    <td>${item.progress}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+               // Function to print the table data
+function printTableData() {
+        const printContent = document.querySelector('.table-container').innerHTML;
+        const originalContent = document.body.innerHTML;
+
+        // Set up content for printing
+        document.body.innerHTML = printContent;
+        window.print();
+
+        // Restore the original content
+        document.body.innerHTML = originalContent;
+        location.reload(); // Reload the page to restore event listeners
+    }
+        
+      // Update the summary section
+function updateSummary(dataSubset) {
+    const totalAmount = dataSubset.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
+    const totalJobs = dataSubset.length;
+    const averageProgress = dataSubset.reduce((sum, item) => sum + parseFloat(item.progress || 0), 0) / totalJobs || 0;
+
+    document.getElementById('totalAmount').textContent = `Rs ${totalAmount.toFixed(2)}`; // Updated to Sri Lankan Rupees
+    document.getElementById('totalJobs').textContent = totalJobs;
+    document.getElementById('averageProgress').textContent = `${averageProgress.toFixed(2)}%`;
+}
+
+
+        document.addEventListener('DOMContentLoaded', loadTableData);
+
+ 
+    </script>
+</body>
+</html>
